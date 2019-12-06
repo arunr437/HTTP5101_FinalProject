@@ -51,6 +51,15 @@ namespace n01358379_FinalProject
         protected global::System.Web.UI.WebControls.TextBox page_content;
 
         /// <summary>
+        /// page_author_list control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList page_author_list;
+
+        /// <summary>
         /// page_author control.
         /// </summary>
         /// <remarks>

@@ -1,8 +1,26 @@
-﻿document.onload = function () {
-    alert("Hi");
+﻿window.onload = function () {
     var count = 0;
+
+    $("#clickMe").click(changeFont);
+    $("#clickMe").css("float", "right");
+    $(".formHide").hide();
+    $("#page_author").prop('required',false);
+
+    $(".formAuthorList").change(function () {
+        // Pure JS
+        var selectedVal = this.value;
+
+
+        if (selectedVal == "New") {
+            $(".formHide").show("slow");
+        }
+        else {
+            $(".formHide").hide();
+        }
+    });
+
+
     function changeFont() {
-        alert("hi");
         count = count + 1;
         if (count % 5 == 0)
             $("body").css("font-family", "Georgia, serif");

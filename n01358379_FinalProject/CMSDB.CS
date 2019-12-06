@@ -11,179 +11,179 @@ namespace n01358379_FinalProject
     public class CMSDB
     {
 
-        /*
-        *************************************************************************************************************************************************************************************  
-		Christine Bittle's Github repository used as 'REFERENCE'.
-		Author: Christine Bittle
-		Date: 2019-09-24
-		Site: https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s02.html
-		Purpose: To get regular expressions for Canadians phone numbers
-		\******************************************************************************************************************************************************************************* --%>
-         */
-
-        // Database configuration details. Private access specifier is used to protect it and implement encapsulation
-
+        
+        // Connection string is stored in the below line. Private access modifier is used to protect it from being accessed outside the class. 
         private static string ConnectionString = "server=localhost;user=root;database=contentmanagementsystem;port=3306;password=password";
 
-        //Funciton to display all the records in the table. Below funciton returns to List of type <Dictionary<String,String>> 
-        public List<Dictionary<String, String>> ListPages(string query)
-        {
-            Debug.WriteLine("Entered function ListPages");
-
+        //ListPages function returns a 'List of HTTP_Page objects'. Using these page objects the records are dynamically displayed. 
+        public List<HTTP_Page> ListPages(string query)
+        { 
             MySqlConnection Connect = new MySqlConnection(ConnectionString);
-
-            Debug.WriteLine("Created Connect object");
-            List<Dictionary<String, String>> ResultSet = new List<Dictionary<String, String>>();
-            Debug.WriteLine("After List Dictionary");
+           
+            // Creating a List of HTTP_Page objects, which will be modified and returned by the function. 
+            List<HTTP_Page> pageList = new List<HTTP_Page>();
 
             try
             {
-                Debug.WriteLine("Connection Initialized...");
-                Debug.WriteLine("Attempting to execute query " + query);
-                //open the db connection
+                //The below lines opens a connection, passes query to the connection and gets the result set after executing the query. 
                 Connect.Open();
-                //give the connection a query
                 MySqlCommand cmd = new MySqlCommand(query, Connect);
-                //grab the result set
                 MySqlDataReader resultset = cmd.ExecuteReader();
 
+                //Looping through the resultset to get the details needed to display in listPages.
                 while (resultset.Read())
                 {
-                    Debug.WriteLine("Entered while loop");
-                    Dictionary<String, String> row = new Dictionary<String, String>();
+                    //Creating page object which will hold  individual record details. This will be added to the list ('pageList').
+                    HTTP_Page page = new HTTP_Page();
                     Debug.WriteLine("Reading from the result Set");
-                    for (int i = 0; i < resultset.FieldCount; i++)
-                    {
-                        Debug.WriteLine(resultset.GetName(i));
-                        row.Add(resultset.GetName(i), resultset.GetString(i));
-                    }
-
-                    ResultSet.Add(row);
-                    Debug.WriteLine(row);
-                }
-                resultset.Close();
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Something went wrong in the List_Query method!");
-                Debug.WriteLine(ex.ToString());
-            }
-            finally
-            {
-                Connect.Close();
-            }
-            Debug.WriteLine("Database Connection Terminated.");
-            return ResultSet;
-        }
-
-        public HTTP_Page ViewPage(int id)
-        {
-            //Utilize the connection string
-            MySqlConnection Connect = new MySqlConnection(ConnectionString);
-            //create a "blank" student so that our method can return something if we're not successful catching student data
-            HTTP_Page result_page = new HTTP_Page();
-
-            //we will try to grab student data from the database, if we fail, a message will appear in Debug>Windows>Output dialogue
-            try
-            {
-                //Build a custom query with the id information provided
-                string query = "select * from PAGE where pageid = " + id;
-                Debug.WriteLine("Connection Initialized...");
-                //open the db connection
-                Connect.Open();
-                //Run out query against the database
-                MySqlCommand cmd = new MySqlCommand(query, Connect);
-                //grab the result set
-                MySqlDataReader resultset = cmd.ExecuteReader();
-
-                //Create a list of students (although we're only trying to get 1)
-                List<HTTP_Page> pages = new List<HTTP_Page>();
-
-                //read through the result set
-                while (resultset.Read())
-                {
-                    //information that will store a single student
-                    HTTP_Page currentstudent = new HTTP_Page();
-
-                    //Look at each column in the result set row, add both the column name and the column value to our Student dictionary
+                    //Code to get individual record details.
                     for (int i = 0; i < resultset.FieldCount; i++)
                     {
                         string key = resultset.GetName(i);
                         string value = resultset.GetString(i);
-                        Debug.WriteLine("Attempting to transfer " + key + " data of " + value);
-                        //can't just generically put data into a dictionary anymore
-                        //must go through each column one by one to insert data into the right property
-                        switch (key)
+
+                        if(key=="pageid")
                         {
-                            case "pagetitle":
-                                currentstudent.SetPageTitle(value);
-                                break;
-                            case "pagebody":
-                                currentstudent.SetPageContent(value);
-                                break;
-                            case "pageauthor":
-                                currentstudent.SetPageAuthor(value);
-                                break;  
-                            case "pagedate":
-                                currentstudent.SetPagePublishDate(value);
-                                break;
+                            page.SetPageId(Int32.Parse(value)); 
                         }
-
+                        if(key=="pagetitle")
+                        {
+                            page.SetPageTitle(value);
+                        }   
+                        if(key=="pagebody")
+                        {
+                            page.SetPageContent(value);
+                        }              
+                        if(key=="pageauthor")
+                        {
+                            page.SetPageAuthor(value);
+                        }             
+                        if(key=="pagedate")
+                        {
+                            page.SetPagePublishDate(value);
+                        }
+                        if(key=="pagestatus")
+                        {
+                            page.SetPagePublishStatus(bool.Parse(value));
+                        }
                     }
-                    //Add the student to the list of students
-                    pages.Add(currentstudent);
+                    //Adding an individual page record to the pageList. 
+                    pageList.Add(page);
                 }
-
-                result_page = pages[0]; //get the first student
-
+                resultset.Close();
             }
             catch (Exception ex)
             {
-                //If something (anything) goes wrong with the try{} block, this block will execute
-                Debug.WriteLine("Something went wrong in the find teacher method!");
+                Debug.WriteLine("An exception occured in the ListPages(String query) method! ");
                 Debug.WriteLine(ex.ToString());
             }
-
             finally
             {
+                //Closing the connection
                 Connect.Close();
             }
-            Debug.WriteLine("Database Connection Terminated.");
+            Debug.WriteLine("Database Connection Closed.");
+            //Returning pageList which has a list of HTTP_Page objects.
+            return pageList;
+        }
 
-            return result_page;
+        public HTTP_Page ViewPage(int id)
+        {
+            //Creating an object of class connect using the connectionString 
+            MySqlConnection Connect = new MySqlConnection(ConnectionString);
+            //Creating an object of HTTP_Page which will be returned by the function
+            HTTP_Page page = new HTTP_Page();
+
+            //Try block to catch exceptions that may arise from the code. 
+            try
+            {
+                //Below query will select the record  with the pageid passed in the parameter. 
+                string query = "select * from PAGE where pageid = " + id;
+                Debug.WriteLine("Connection Initialized...");
+
+                //Below lines open the connection, run the query against the db and get the resultset
+                Connect.Open();
+                MySqlCommand cmd = new MySqlCommand(query, Connect);
+                MySqlDataReader resultset = cmd.ExecuteReader();
+
+                //read through the result set
+                while (resultset.Read())
+                {
+                    //To loop across each column in the PAGE table
+                    for (int i = 0; i < resultset.FieldCount; i++)
+                    {
+                        string key = resultset.GetName(i);
+                        string value = resultset.GetString(i);
+
+                        if (key == "pagetitle")
+                        {
+                            page.SetPageTitle(value);
+                        }
+                        if (key == "pagebody")
+                        {
+                            page.SetPageContent(value);
+                        }
+                        if (key == "pageauthor")
+                        {
+                            page.SetPageAuthor(value);
+                        }
+                        if (key == "pagedate")
+                        {
+                            page.SetPagePublishDate(value);
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                //Writing the error in order to debug
+                Debug.WriteLine("Exception in ViewPage(int id) method!");
+                Debug.WriteLine(ex.ToString());
+            }
+            //Below block will execute even when there's an exception. 
+            finally
+            {
+                
+                Connect.Close();
+                Debug.WriteLine("Database connection closed.");
+
+            }
+            //Returning the required page
+            return page;
         }
 
 
         public void AddPage(HTTP_Page new_page)
-        {
-            //slightly better way of injecting data into strings
-
-            string query = "insert into PAGE (PAGETITLE,PAGEBODY,PAGEDATE,PAGESTATUS,PAGEAUTHOR,PAGEMAINCONTENT1,PAGEMAINCONTENT2) values ('{0}','{1}',now(),'{2}','{3}','{4}','{5}')";
+        {           
+            //SQL query to insert data into the PAGE table       
+            string query = "insert into PAGE (PAGETITLE,PAGEBODY,PAGEDATE,PAGESTATUS,PAGEAUTHOR) values ('{0}','{1}',now(),'{2}','{3}')";
+            
+            //To insert values for PAGESTATUS field which is of type boolean. 0 is inserted if PAGESTATUS is false, 1 if true.
             int page_publish_value = 0; 
             if(new_page.GetPagePublishStatus())
             {
                 page_publish_value = 1;
             }
-            query = String.Format(query, new_page.GetPageTitle(), new_page.GetPageContent(),page_publish_value,new_page.GetPageAuthor(),new_page.GetPageMainContent1(),new_page.GetPageMainContent2());
 
-            //This technique is still sensitive to SQL injection
-            //
+            //Getting data from 'new_page' object which is passed in the parameter of the function during the function call. ('db.AddPage(new_page)')
+            query = String.Format(query, new_page.GetPageTitle(), new_page.GetPageContent(),page_publish_value,new_page.GetPageAuthor());
 
+            //Creating a new connection object using the connection string and Creating an object for a MySqlCommand using query and the connect object.
             MySqlConnection Connect = new MySqlConnection(ConnectionString);
             MySqlCommand cmd = new MySqlCommand(query, Connect);
+
+            //try catch and finally for exception handling
             try
             {
                 Connect.Open();
                 cmd.ExecuteNonQuery();
-
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Something went wrong in the AddStudent Method!");
+                Debug.WriteLine("Exception in the AddPage(HTTP_Page new_page) method");
                 Debug.WriteLine(ex.ToString());
             }
-
             finally
             {
                 Connect.Close();
@@ -193,75 +193,72 @@ namespace n01358379_FinalProject
 
         public void DeletePage(int pageid)
         {
- 
+            //Query to delete record from the PAGE table based on the pageid
+            string query = "delete from page where pageid = {0}";
 
-            //DELETING ON THE PRIMARY KEY OF STUDENTS
-            string removepage = "delete from page where pageid = {0}";
-            removepage = String.Format(removepage, pageid);
-
+            // Creating connection object with the connection string and creating a MySqLCommand with the query and the connection object. 
             MySqlConnection Connect = new MySqlConnection(ConnectionString);
+            query = String.Format(query, pageid);
+            MySqlCommand cmd_removepage = new MySqlCommand(query, Connect);
 
-            //This command removes the particular student from the table
-            MySqlCommand cmd_removepage = new MySqlCommand(removepage, Connect);
+            //try,catch and finally for exception handling
             try
             {
-                //try to execute both commands!
+                // Code to open the connection and to execute the query on the database.
                 Connect.Open();
-                //remember to remove the relational element first
                 cmd_removepage.ExecuteNonQuery();
-                Debug.WriteLine("Executed query " + cmd_removepage);
-                //then delete the main record
-                cmd_removepage.ExecuteNonQuery();
-                Debug.WriteLine("Executed query " + cmd_removepage);
             }
             catch (Exception ex)
             {
                 //if this isn't working as intended, you can check debug>windows>output for the error message.
-                Debug.WriteLine("Something went wrong in the delete Student Method!");
+                Debug.WriteLine("Exception in the DeletPage(int pageid) method");
                 Debug.WriteLine(ex.ToString());
             }
 
             finally
             {
+                //Closing the connection.
                 Connect.Close();
             }
         }
 
         public void UpdatePage(int pageid, HTTP_Page new_page)
         {
-            //slightly better way of injecting data into strings
-            //the below technique is known as string formatting. It allows us to make strings without "" + ""
+            //SQL query to update the PAGE table with the new values.
             string query = "update PAGE set PAGETITLE='{0}', PAGEBODY='{1}', PAGEAUTHOR='{2}', PAGESTATUS='{3}' where PAGEID = '{4}'";
 
 
-            //The above technique is still sensitive to SQL injection
-            //we will learn about parameterized queries in the 2nd semester
+            //To update values for PAGESTATUS field which is of type boolean. 0 is inserted if PAGESTATUS is false, 1 if true.
             int page_publish_value = 0;
             if (new_page.GetPagePublishStatus())
             {
                 page_publish_value = 1;
             }
 
+            //Getting data from 'new_page' object which is passed in the parameter of the function during the function call. ('db.AddPage(new_page)')
             query = String.Format(query, new_page.GetPageTitle(), new_page.GetPageContent(), new_page.GetPageAuthor(), page_publish_value, pageid);
 
+            //Creating a new connection object using the connection string and Creating an object for a MySqlCommand using query and the connect object.  
             MySqlConnection Connect = new MySqlConnection(ConnectionString);
             MySqlCommand cmd = new MySqlCommand(query, Connect);
             try
             {
-                //Try to update a student with the information provided to us.
+                //Opening the connection and executing the query on the database. 
                 Connect.Open();
                 cmd.ExecuteNonQuery();
-                Debug.WriteLine("Executed query " + query);
             }
             catch (Exception ex)
             {
-                //If that doesn't seem to work, check Debug>Windows>Output for the below message
-                Debug.WriteLine("Something went wrong in the UpdateStudent Method!");
+                
+                Debug.WriteLine("Exception in the updatePage(int pageId, HTTP_Page page) method!");
                 Debug.WriteLine(ex.ToString());
             }
 
- 
+            finally
+            {
+                //Database connection is closed.
                 Connect.Close();
+            }
         }
 
     }

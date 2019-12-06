@@ -14,92 +14,106 @@ namespace n01358379_FinalProject
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            //Creating a CMSDB object to call the ListPages(String query) function. 
             CMSDB db = new CMSDB();
+
+            //Query that will be passed to the ListPages(String query) function.
             String query = "Select * from Page";
 
+            //Code to get the text entered in the searchbox. 
             string searchkey = "";
             if (Page.IsPostBack)
             {
                 searchkey = page_title_search.Text;
             }
-
+            //If text is entered in the searchbox a 'Where' clause with 'like' is added to the query. 
             if (searchkey != "")
             {
                 query += " WHERE PAGETITLE like '%" + searchkey + "%' ";
             }
 
-            Debug.WriteLine("Before List Dictionary");
-            List<Dictionary<String, String>> rs = db.ListPages(query);
-            Debug.WriteLine("After List Dictionary");
-            foreach (Dictionary<String, String> row in rs)
+            //Creating an List of <HTTP_Page> object to hold the List of objects returned by the 'public List<HTTP_Page> ListPages(string query)' method in CMSDB.
+            List<HTTP_Page> pageList = db.ListPages(query);
+
+            //Code to loop through pageList, which contains a List of HTTP_Page object, and get the required details which will be appeded to the table. 
+            foreach (HTTP_Page page in pageList)
             {
-                string pageid = row["pageid"];
-                string pagetitle = row["pagetitle"];
-                string pageauthor = row["pageauthor"];
-                string pagepublishdate = row["pagedate"];
+                //Getting the required fields from each record in the table. 
+                int pageid = page.GetPageId();
+                string pagetitle = page.GetPageTitle();
+                string pageauthor = page.GetPageAuthor();
+                string pagepublishdate = page.GetPagePublishDate();
+                //Creating a DateTime object to hold the Page Publish Date.
                 DateTime date = Convert.ToDateTime(pagepublishdate);
-                string pagepublishstatus = row["pagestatus"];
-                Debug.WriteLine(pageid + pagetitle + pagepublishdate + pagepublishstatus);
+                string pagepublishstatus = page.GetPagePublishStatus().ToString();
+
+                //Creating a HtmlTableRow object trow which will be used to store a single row and eventually be inserted in the HTML markup's <table id="table1"> tag
                 HtmlTableRow trow = new HtmlTableRow();
 
-                HtmlTableCell tb1 = new HtmlTableCell();
+                //Creating a HtmlTableCell object which will contain individual cells that will be put into the HtmlTableRow tRow that was just created. 
+                HtmlTableCell cell1 = new HtmlTableCell();
                 if (pagepublishstatus.ToLower() == "true")
                 {
-                    tb1.InnerHtml = "<a href=\"ViewPage.aspx?pageid=" + pageid + "\">" + pagetitle + "</a>";
+                    cell1.InnerHtml = "<a href=\"ViewPage.aspx?pageid=" + pageid + "\">" + pagetitle + "</a>";
                     
                 }
                 else
                 {
-                    tb1.InnerText = pagetitle;
+                    cell1.InnerText = pagetitle;
                 }
-                trow.Controls.Add(tb1);
+                //Adding the current HtmlTableCell (cell1) in the HttpTableRow tRow.
+                trow.Controls.Add(cell1);
 
-                HtmlTableCell tb2 = new HtmlTableCell();
-                tb2.InnerText = pageauthor;
-                trow.Controls.Add(tb2); 
-                
-                HtmlTableCell tb3 = new HtmlTableCell();
-                tb3.InnerText = date.ToString("dd/MMM/yyyy");
-                trow.Controls.Add(tb3);
+                //Creating and adding  HtmlTableCell (cell2) in the HttpTableRow tRow.
+                HtmlTableCell cell2 = new HtmlTableCell();
+                cell2.InnerText = pageauthor;
+                trow.Controls.Add(cell2);
 
-                HtmlTableCell tb4 = new HtmlTableCell();
+                //Creating and adding  HtmlTableCell (cell3) in the HttpTableRow tRow.
+                HtmlTableCell cell3 = new HtmlTableCell();
+                //Displaying the Date in the 'dd/MMM/yyyy' format in the markup by using the ToString function of dateTime.
+                cell3.InnerText = date.ToString("dd/MMM/yyyy");
+                trow.Controls.Add(cell3);
 
+                //Creating and adding  HtmlTableCell (cell4) in the HttpTableRow tRow.
+                HtmlTableCell cell4 = new HtmlTableCell();
                 if(pagepublishstatus.ToLower()=="true")
                 {
-                    tb4.InnerHtml = "<p> Published </p>";
+                    cell4.InnerHtml = "<p> Published </p>";
                    
                 }
                 else
                 {
-                    tb4.InnerHtml = "<p> Unpublished </p>";
+                    cell4.InnerHtml = "<p> Unpublished </p>";
                
                 }
-                trow.Controls.Add(tb4);
-                
-                HtmlTableCell tb5 = new HtmlTableCell();
+                trow.Controls.Add(cell4);
 
+                //Creating and adding  HtmlTableCell (cell5) in the HttpTableRow tRow.
+                HtmlTableCell cell5 = new HtmlTableCell();
                 if (pagepublishstatus.ToLower() == "true")
                 {
-                    tb5.InnerHtml += "<input type=\"button\" value=\"View\" onclick=\"location.href='ViewPage.aspx?pageid=" + row["pageid"] + "'\" class=\"btn btn-primary rowButton\"/>";
+                    cell5.InnerHtml += "<input type=\"button\" value=\"View\" onclick=\"location.href='ViewPage.aspx?pageid=" + page.GetPageId().ToString() + "'\" class=\"btn btn-primary rowButton\"/>";
                 }
                 else
                 {
-                    tb5.InnerHtml += "<input type=\"button\" value=\"View\" onclick=\"location.href='ViewPage.aspx?pageid=" + row["pageid"] + "'\" class=\"btn btn-primary rowButton\" disabled/>";
+                    cell5.InnerHtml += "<input type=\"button\" value=\"View\" onclick=\"location.href='ViewPage.aspx?pageid=" + page.GetPageId().ToString() + "'\" class=\"btn btn-primary rowButton\" disabled/>";
                 }
+                cell5.InnerHtml += "<input type=\"button\" value=\"Edit\" onclick=\"location.href='UpdatePage.aspx?pageid=" + page.GetPageId().ToString() + "'\" class=\"btn btn-primary rowButton\"/>";
+                trow.Controls.Add(cell5);
 
-                tb5.InnerHtml += "<input type=\"button\" value=\"Edit\" onclick=\"location.href='UpdatePage.aspx?pageid=" + row["pageid"] + "'\" class=\"btn btn-primary rowButton\"/>";
-                trow.Controls.Add(tb5);
+                //Adding the current row to the Table
                 table1.Rows.Add(trow);
-
             }
         }
 
         protected void Delete_Page(object sender, EventArgs e)
         {
-            //MessageBox.Show("Hello Bro");
             CMSDB db = new CMSDB();
+            //Getting the pageid from the Request object.
             string pageid = Request.QueryString["pageid"];
+
+            //If pageid is not empty perform the delete query and go to ListPages.aspx
             if (!String.IsNullOrEmpty(pageid))
             {
                 db.DeletePage(Int32.Parse(pageid));

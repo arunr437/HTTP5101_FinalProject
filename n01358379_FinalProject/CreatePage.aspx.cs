@@ -11,18 +11,43 @@ namespace n01358379_FinalProject
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            // The below section of code is used to get the List of Authors from the Page table and display them in a dropdown box. 
 
+            CMSDB db = new CMSDB();
+            List<HTTP_Page> pageList = new List<HTTP_Page>();
+
+            //Query to select  distinct Authors from the table to be displayed in the dropdown box.
+            pageList = db.ListPages("select distinct pageauthor from page;");
+
+            //Code to insert the list of Authors in the dropdown menu 'page_author_list' present in CreatePage.aspx. ***Not a part of the initial wireframe***
+            //Using the foreach loop Authors are retrieved from the pageList object and stored in 'ListItem' which will be added to the drop down list. 
+            foreach (HTTP_Page page in pageList)
+            {
+                ListItem item = new ListItem();
+                item.Text = page.GetPageAuthor();
+                item.Value = page.GetPageAuthor();
+                page_author_list.Items.Add(item);
+            }
+
+            //Adding a final List Item which will be used to 'add new authors' into the table. Clicking this will show another textbox in which new author can be added. 
+            ListItem newAuthorItem = new ListItem();
+            newAuthorItem.Text = "-------------- Add a new Author --------------";
+            newAuthorItem.Value = "New";
+            page_author_list.Items.Add(newAuthorItem);
         }
 
         protected void Add_Page(object sender, EventArgs e)
         {
-            //create connection
+            // Creating a CMSDB object to use the AddPage(HTTP_Page page) method.
             CMSDB db = new CMSDB();
 
-            //create a new particular student
+            //Creating a new HTTP_Page object which store the values retrieved from the form. s
             HTTP_Page new_page = new HTTP_Page();
-            //set that student data
+
+            //Code to get the values from the form and set it to the 'new_page' object.
             new_page.SetPageTitle(page_title.Text);
+
+            //if page_publish_box is checked true will be stored in pagePublishStatus which is of Boolean type
             new_page.SetPageContent(page_content.Text);
             if (page_publish_box.Checked)
             {
@@ -32,13 +57,22 @@ namespace n01358379_FinalProject
             {
                 new_page.SetPagePublishStatus(false);
             }
-            new_page.SetPageAuthor(page_author.Text);
-            new_page.SetPageMainContent1(page_main_column_1.Text);
-            new_page.SetPageMainContent2(page_main_column_2.Text);
 
+            // If 'Add new author' option in selected in the drop down, the data entered in the 'page_author' textbox will be inserted into the db.
+            if (page_author_list.SelectedItem.Value == "New")
+            {
+                new_page.SetPageAuthor(page_author.Text);
+            }
+            else
+            {
+                new_page.SetPageAuthor(page_author_list.SelectedItem.Value);
 
-            //add the student to the database
+            }
+
+            //Calling the AddPage function to insert the page details into the database. 
             db.AddPage(new_page);
+
+            //Going back to ListPages.aspx after inserting the data. 
             Response.Redirect("ListPages.aspx");
         }
 

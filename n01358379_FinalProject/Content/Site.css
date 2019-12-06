@@ -67,9 +67,7 @@ textarea {
 }
 
 @media screen and (max-width: 768px) {
-    .jumbotron {
-        margin-top: 20px;
-    }
+
     #MainContent_pageList {
         display: inline-block;
         width: 100%;

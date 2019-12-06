@@ -7,24 +7,21 @@ namespace n01358379_FinalProject
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            //Creating an object for the CMSDB file to call its functions. 
             CMSDB db = new CMSDB();
-            search(db);
-        }
 
-        void search(CMSDB db)
-        {
-            //query the most popular classes (most students)
-
+            //Query to select the pages which are published
             string query = "select * from page where pagestatus=true";
-            List<Dictionary<String, String>> rs = db.ListPages(query);
 
+            //Creating an List of <HTTP_Page> object to hold the List of objects returned by the 'public List<HTTP_Page> ListPages(string query)' method in CMSDB.
+            List<HTTP_Page> pageList = db.ListPages(query);
+
+            //Code to insert the HTML markup using the 'InnerHtml' property of the 'UserControlHeading1' div tag
             UserControlHeading1.InnerHtml = "<ul class=\"nav navbar-nav\">";
-
-            foreach (Dictionary<String, String> row in rs)
+            foreach (HTTP_Page page in pageList)
             {
-                UserControlHeading1.InnerHtml += "<li><a runat=\"server\" href=\"ViewPage.aspx?pageid=" + row["pageid"] + "\">"+row["pagetitle"]+"</a></li>";
+                UserControlHeading1.InnerHtml += "<li><a runat=\"server\" href=\"ViewPage.aspx?pageid=" + page.GetPageId().ToString() + "\">" + page.GetPageTitle() + "</a></li>";
             }
-
             UserControlHeading1.InnerHtml += "</ul>";
         }
     }

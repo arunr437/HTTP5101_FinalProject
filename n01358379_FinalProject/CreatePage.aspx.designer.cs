@@ -24,15 +24,6 @@ namespace n01358379_FinalProject
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl pageId;
 
         /// <summary>
-        /// clickMe control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputButton clickMe;
-
-        /// <summary>
         /// page_title control.
         /// </summary>
         /// <remarks>
@@ -40,6 +31,15 @@ namespace n01358379_FinalProject
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox page_title;
+
+        /// <summary>
+        /// page_author_list control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList page_author_list;
 
         /// <summary>
         /// page_author control.
@@ -58,24 +58,6 @@ namespace n01358379_FinalProject
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox page_content;
-
-        /// <summary>
-        /// page_main_column_1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox page_main_column_1;
-
-        /// <summary>
-        /// page_main_column_2 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox page_main_column_2;
 
         /// <summary>
         /// page_publish_box control.
